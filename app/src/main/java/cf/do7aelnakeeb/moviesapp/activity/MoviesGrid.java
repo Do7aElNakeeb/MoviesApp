@@ -66,7 +66,6 @@ public class MoviesGrid extends Fragment {
 
         MoviesRecyclerView = (RecyclerView) view.findViewById(R.id.MovieRecyclerView);
 
-
         MoviesRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 2, LinearLayoutManager.VERTICAL, false));
 
         MoviesRecyclerView.setItemAnimator(new DefaultItemAnimator());

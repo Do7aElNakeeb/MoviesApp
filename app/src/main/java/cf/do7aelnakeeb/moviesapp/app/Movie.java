@@ -1,10 +1,12 @@
 package cf.do7aelnakeeb.moviesapp.app;
 
+import java.io.Serializable;
+
 /**
  * Created by NakeebMac on 10/21/16.
  */
 
-public class Movie {
+public class Movie implements Serializable{
 
     private String name;
     private String description;

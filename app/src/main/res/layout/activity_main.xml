@@ -6,10 +6,10 @@
     android:layout_height="match_parent"
     tools:context="cf.do7aelnakeeb.moviesapp.activity.MainActivity">
 
-    <android.support.v7.widget.RecyclerView
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/MovieRecyclerView">
+        android:id="@+id/movieDetailsFragment">
 
-    </android.support.v7.widget.RecyclerView>
+    </FrameLayout>
 </RelativeLayout>

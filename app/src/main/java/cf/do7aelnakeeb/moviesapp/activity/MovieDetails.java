@@ -33,8 +33,9 @@ public class MovieDetails extends Fragment {
         ReleaseDate = (TextView) view.findViewById(R.id.ReleaseDate);
         Rating = (TextView) view.findViewById(R.id.MovieRating);
         Description = (TextView) view.findViewById(R.id.MovieDescription);
-
         Image = (ImageView) view.findViewById(R.id.MovieImage);
+
+        
 
         return view;
     }

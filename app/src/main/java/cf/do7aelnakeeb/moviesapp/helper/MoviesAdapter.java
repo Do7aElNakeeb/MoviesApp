@@ -1,6 +1,11 @@
 package cf.do7aelnakeeb.moviesapp.helper;
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +17,8 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 
 import cf.do7aelnakeeb.moviesapp.R;
+import cf.do7aelnakeeb.moviesapp.activity.MovieDetails;
+import cf.do7aelnakeeb.moviesapp.activity.MoviesGrid;
 import cf.do7aelnakeeb.moviesapp.app.AppConst;
 import cf.do7aelnakeeb.moviesapp.app.Movie;
 
@@ -45,6 +52,18 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
     public void onBindViewHolder(ViewHolder holder, int position) {
 
         Picasso.with(context).load(AppConst.MoviesDBImageURL + arrayList.get(position).getImage()).into(holder.MoviePoster);
+
+        holder.MoviePoster.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fragmentManager = ((FragmentActivity)context).getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                MovieDetails movieDetails = new MovieDetails();
+
+                fragmentTransaction.add(R.id.movieDetailsFragment, movieDetails);
+                fragmentTransaction.commit();
+            }
+        });
     }
 
     @Override
