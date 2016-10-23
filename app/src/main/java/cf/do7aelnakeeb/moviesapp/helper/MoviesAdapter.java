@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,9 +19,9 @@ import java.util.ArrayList;
 
 import cf.do7aelnakeeb.moviesapp.R;
 import cf.do7aelnakeeb.moviesapp.activity.MovieDetails;
-import cf.do7aelnakeeb.moviesapp.activity.MoviesGrid;
 import cf.do7aelnakeeb.moviesapp.app.AppConst;
 import cf.do7aelnakeeb.moviesapp.app.Movie;
+import cf.do7aelnakeeb.moviesapp.activity.MoviesGrid;
 
 /**
  * Created by NakeebMac on 10/21/16.
@@ -30,10 +31,12 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
 
     private Context context;
     private ArrayList<Movie> arrayList;
+    private MoviesGrid.OnMovieSelected onMovieSelected;
 
-    public MoviesAdapter(Context context, ArrayList<Movie> arrayList) {
+    public MoviesAdapter(Context context, ArrayList<Movie> arrayList, MoviesGrid.OnMovieSelected onMovieSelected) {
         this.context = context;
         this.arrayList = arrayList;
+        this.onMovieSelected = onMovieSelected;
 
     }
 
@@ -49,21 +52,18 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, int position) {
 
         Picasso.with(context).load(AppConst.MoviesDBImageURL + arrayList.get(position).getImage()).into(holder.MoviePoster);
 
         holder.MoviePoster.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FragmentManager fragmentManager = ((FragmentActivity)context).getSupportFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                MovieDetails movieDetails = new MovieDetails();
+                onMovieSelected.onMovieSelected(arrayList.get(holder.getAdapterPosition()));
 
-                fragmentTransaction.add(R.id.movieDetailsFragment, movieDetails);
-                fragmentTransaction.commit();
             }
         });
+
     }
 
     @Override

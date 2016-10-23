@@ -1,7 +1,10 @@
 package cf.do7aelnakeeb.moviesapp.activity;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -43,6 +46,8 @@ public class MoviesGrid extends Fragment {
     private static final String TAG = MainActivity.class.getSimpleName();
     private ProgressDialog pDialog;
 
+    OnMovieSelected onMovieSelected;
+
     RecyclerView MoviesRecyclerView;
     MoviesAdapter moviesAdapter;
     ArrayList<Movie> movieArrayList;
@@ -56,15 +61,14 @@ public class MoviesGrid extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
-        View view = inflater.inflate(R.layout.movies_grid, container, false);
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
         // Progress dialog
         pDialog = new ProgressDialog(getActivity());
         pDialog.setCancelable(false);
 
-        MoviesRecyclerView = (RecyclerView) view.findViewById(R.id.MovieRecyclerView);
+        MoviesRecyclerView = (RecyclerView) getView().findViewById(R.id.MovieRecyclerView);
 
         MoviesRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 2, LinearLayoutManager.VERTICAL, false));
 
@@ -72,12 +76,34 @@ public class MoviesGrid extends Fragment {
 
         syncMovies();
 
-        moviesAdapter = new MoviesAdapter(getActivity(), movieArrayList);
+//        moviesAdapter = new MoviesAdapter(getActivity(), movieArrayList, onMovieSelected);
         MoviesRecyclerView.setAdapter(moviesAdapter);
 
-        return view;
     }
 
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+        return inflater.inflate(R.layout.movies_grid, container, false);
+
+    }
+
+    // Container Activity must implement this interface
+    public interface OnMovieSelected {
+        void onMovieSelected(Movie movie);
+    }
+
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        try {
+            onMovieSelected = (OnMovieSelected) getActivity();
+        } catch (ClassCastException e) {
+            throw new ClassCastException(getActivity().toString() + " must implement OnMovieSelected");
+        }
+    }
 
     private void syncMovies(){
 
@@ -124,7 +150,7 @@ public class MoviesGrid extends Fragment {
 
                                 }
 
-                                moviesAdapter = new MoviesAdapter(getActivity(), movieArrayList);
+                                moviesAdapter = new MoviesAdapter(getActivity(), movieArrayList, onMovieSelected);
                                 MoviesRecyclerView.setAdapter(moviesAdapter);
 
                             }
