@@ -37,7 +37,6 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
         this.context = context;
         this.arrayList = arrayList;
         this.onMovieSelected = onMovieSelected;
-
     }
 
     @Override

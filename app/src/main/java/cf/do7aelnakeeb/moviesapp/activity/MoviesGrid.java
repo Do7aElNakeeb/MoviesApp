@@ -19,6 +19,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
@@ -43,7 +45,7 @@ import cf.do7aelnakeeb.moviesapp.helper.MoviesAdapter;
 
 public class MoviesGrid extends Fragment {
 
-    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String TAG = MoviesGrid.class.getSimpleName();
     private ProgressDialog pDialog;
 
     OnMovieSelected onMovieSelected;
@@ -76,7 +78,7 @@ public class MoviesGrid extends Fragment {
 
         syncMovies();
 
-//        moviesAdapter = new MoviesAdapter(getActivity(), movieArrayList, onMovieSelected);
+        moviesAdapter = new MoviesAdapter(getActivity(), movieArrayList, onMovieSelected);
         MoviesRecyclerView.setAdapter(moviesAdapter);
 
     }
@@ -105,6 +107,13 @@ public class MoviesGrid extends Fragment {
         }
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putParcelable("selectedMovie", movieArrayList.get(0));
+    }
+
     private void syncMovies(){
 
         // Tag used to cancel the request
@@ -114,7 +123,7 @@ public class MoviesGrid extends Fragment {
         showDialog();
 
 
-        StringRequest strReq = new StringRequest(com.android.volley.Request.Method.POST, AppConst.MoviesDBURL + AppConst.MoviesDBCategories[MoviesCategories],
+        StringRequest strReq = new StringRequest(Request.Method.POST, AppConst.MoviesDBURL + AppConst.MoviesDBCategories[MoviesCategories],
                 new Response.Listener<String>() {
 
 
@@ -140,18 +149,21 @@ public class MoviesGrid extends Fragment {
                                     JSONObject obj = (JSONObject) resultsArr.get(i);
 
                                     // DB QueryValues Object to insert into Movies ArrayList
+                                    String id = obj.get("id").toString();
                                     String name = obj.get("original_title").toString();
                                     String description = obj.get("overview").toString();
                                     String rating = obj.get("vote_average").toString();
                                     String image = obj.get("poster_path").toString();
                                     String release_date = obj.get("release_date").toString();
 
-                                    movieArrayList.add(new Movie(name, description, rating, image, release_date));
+                                    movieArrayList.add(new Movie(id, name, description, rating, image, release_date));
 
                                 }
 
                                 moviesAdapter = new MoviesAdapter(getActivity(), movieArrayList, onMovieSelected);
                                 MoviesRecyclerView.setAdapter(moviesAdapter);
+
+                                //hideDialog();
 
                             }
                         } catch (JSONException e) {
@@ -178,7 +190,22 @@ public class MoviesGrid extends Fragment {
                 params.put("language", AppConst.MoviesDBAPILanguage);
                 return params;
             }
+
+
+            /**
+             * Passing some request headers
+             * */
+            /*
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> headers = new HashMap<String, String>();
+                //   headers.put("Content-Type", "application/json");
+                headers.put("api_key", AppConst.APIKey);
+                return headers;
+            }
+            */
         };
+
 
         // Adding request to request queue
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);

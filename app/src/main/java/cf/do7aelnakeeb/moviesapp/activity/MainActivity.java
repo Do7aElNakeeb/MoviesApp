@@ -1,6 +1,9 @@
 package cf.do7aelnakeeb.moviesapp.activity;
 
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.graphics.drawable.GradientDrawable;
+import android.os.PersistableBundle;
 import android.support.v4.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.support.v4.app.FragmentTransaction;
@@ -41,6 +44,11 @@ public class MainActivity extends AppCompatActivity implements MoviesGrid.OnMovi
 
     Boolean movieDetailsFrag = false;
 
+    MoviesGrid moviesGrid;
+    MovieDetails movieDetails;
+
+    Movie movie;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,11 +57,36 @@ public class MainActivity extends AppCompatActivity implements MoviesGrid.OnMovi
         if (savedInstanceState == null){
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            MoviesGrid moviesGrid = new MoviesGrid();
+            moviesGrid = new MoviesGrid();
 
             fragmentTransaction.add(R.id.movieGridFragment, moviesGrid, "Movies Grid");
             fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
             fragmentTransaction.commit();
+        }
+
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            movieDetailsFrag = true;
+//            movie = movieDetails.selectedMovie;
+//            Log.d("aaaaa", movie.getName());
+            Toast.makeText(this, "Landscape Orient", Toast.LENGTH_SHORT).show();
+            if (movieDetails != null) {
+                Log.d("bbbb", "nullo");
+                getSupportFragmentManager().beginTransaction().remove(movieDetails).commit();
+            }
+/*
+            movieDetails = (MovieDetails) getSupportFragmentManager().findFragmentById(R.id.movieDetailsFragment);
+            if(movieDetails == null){
+                FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                movieDetails = new MovieDetails();
+//                moviesGrid = new MoviesGrid();
+//                movieDetails.setMovie(moviesGrid.movieArrayList.get(0));
+//                ft.replace(R.id.movieGridFragment, moviesGrid, "Movies Grid");
+                getSupportFragmentManager().beginTransaction().remove(movieDetails).commit();
+                ft.replace(R.id.movieDetailsFragment, movieDetails, "Movie Details Fragment");
+                ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+                ft.commit();
+            }
+*/
         }
 
 
@@ -61,13 +94,15 @@ public class MainActivity extends AppCompatActivity implements MoviesGrid.OnMovi
             movieDetailsFrag = true;
             getFragmentManager().popBackStack();
 
-            MovieDetails movieDetails = (MovieDetails) getSupportFragmentManager().findFragmentById(R.id.movieDetailsFragment);
+            movieDetails = (MovieDetails) getSupportFragmentManager().findFragmentById(R.id.movieDetailsFragment);
             if(movieDetails == null){
                 FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
                 movieDetails = new MovieDetails();
-                MoviesGrid moviesGrid = new MoviesGrid();
-                ft.replace(R.id.movieGridFragment, moviesGrid, "Movies Grid");
+                moviesGrid = new MoviesGrid();
+//                movieDetails.setMovie(moviesGrid.movieArrayList.get(0));
+//                getSupportFragmentManager().beginTransaction().remove(movieDetails).commit();
                 ft.replace(R.id.movieDetailsFragment, movieDetails, "Movie Details Fragment");
+                ft.replace(R.id.movieGridFragment, moviesGrid, "Movies Grid");
                 ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                 ft.commit();
             }
@@ -76,15 +111,22 @@ public class MainActivity extends AppCompatActivity implements MoviesGrid.OnMovi
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable("selectedMovie", movie);
+    }
+
+    @Override
     public void onMovieSelected(Movie movie) {
+        this.movie = movie;
         if(movieDetailsFrag){
             Log.d("Movie Name", movie.getName());
-            MovieDetails movieDetails = (MovieDetails) getSupportFragmentManager().findFragmentById(R.id.movieDetailsFragment);
+            movieDetails = (MovieDetails) getSupportFragmentManager().findFragmentById(R.id.movieDetailsFragment);
             movieDetails.updateMovieDetails(movie);
         }
         else{
             Log.d("Movie Name1", movie.getName());
-            MovieDetails movieDetails = new MovieDetails();
+            movieDetails = new MovieDetails();
             movieDetails.setMovie(movie);
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             ft.replace(R.id.movieGridFragment, movieDetails, "Movie Details Fragment");

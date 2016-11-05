@@ -72,16 +72,41 @@
                 android:text="Lorem ipsum dolor sit amet, elementum odio quis urna, id malesuada diam dapibus vel. Dolor veritatis dictumst ipsum dolor, libero neque, aliquam suscipit, in feugiat cras rutrum dignissimos amet et. Libero pellentesque tellus sodales libero sed, nunc fermentum pulvinar nullam non nunc, placerat tellus diam interdum."
                 android:id="@+id/MovieDescription"/>
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Trailers"
+                android:layout_marginLeft="20dp"
+                android:layout_marginBottom="10dp"/>
+
             <android.support.v7.widget.RecyclerView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="20dp">
+                android:id="@+id/trailersRecyclerView"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginBottom="10dp">
+
+            </android.support.v7.widget.RecyclerView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Reviews"
+                android:layout_marginLeft="20dp"
+                android:layout_marginBottom="10dp"/>
+
+            <android.support.v7.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/reviewsRecyclerView"
+                android:divider="@android:color/darker_gray"
+                android:dividerHeight="0.5dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp">
 
             </android.support.v7.widget.RecyclerView>
         </LinearLayout>
     </ScrollView>
-
-
-
 
 </LinearLayout>
