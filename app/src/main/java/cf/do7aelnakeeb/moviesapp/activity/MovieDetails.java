@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -15,9 +16,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
@@ -44,22 +49,32 @@ import cf.do7aelnakeeb.moviesapp.app.Movie;
 import cf.do7aelnakeeb.moviesapp.helper.DividerItemDecoration;
 import cf.do7aelnakeeb.moviesapp.helper.MoviesAdapter;
 import cf.do7aelnakeeb.moviesapp.helper.ReviewsAdapter;
+import cf.do7aelnakeeb.moviesapp.helper.SQLiteHandler;
 import cf.do7aelnakeeb.moviesapp.helper.TrailersAdapter;
 
 /**
  * Created by NakeebMac on 10/21/16.
  */
 
-public class MovieDetails extends Fragment {
+public class MovieDetails extends Fragment implements CompoundButton.OnCheckedChangeListener {
+
+    // TODO the movie details opened in portrait become selected in landscape
 
     private static final String TAG = MovieDetails.class.getSimpleName();
     private ProgressDialog pDialog;
+    //private ProgressDialog TrailersLoading;
+    private ProgressBar TrailersLoading;
+    private ProgressBar ReviewsLoading;
 
+    ToggleButton favMovie;
     TextView Title;
     TextView ReleaseDate;
     TextView Rating;
     TextView Description;
     ImageView Image;
+
+    TextView trailersTxtView;
+    TextView reviewsTxtView;
 
     RecyclerView ReviewsRecyclerView;
     ReviewsAdapter reviewsAdapter;
@@ -70,29 +85,56 @@ public class MovieDetails extends Fragment {
     ArrayList<Movie.Trailer> trailerArrayList;
 
     Movie selectedMovie;
+    SharedPreferences prefs;
+    SharedPreferences.Editor editor;
+
+    SQLiteHandler sqLiteHandler;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (savedInstanceState != null){
+
+            //selectedMovie = savedInstanceState.getParcelable("selectedMovie");
+
+            selectedMovie = new Movie(savedInstanceState.getString("id"), savedInstanceState.getString("name"), savedInstanceState.getString("description"),
+                    savedInstanceState.getString("rating"), savedInstanceState.getString("release_date"), savedInstanceState.getString("image"));
+            Log.d("ccc", selectedMovie.getName());
+        }
+
+        sqLiteHandler = new SQLiteHandler(getContext());
+
+        try {
+            sqLiteHandler.open();
+        }
+        catch (Exception e){
+            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (savedInstanceState != null){
-            selectedMovie = savedInstanceState.getParcelable("selectedMovie");
-            //Log.d("ccc", selectedMovie.getName());
+            selectedMovie = new Movie(savedInstanceState.getString("id"), savedInstanceState.getString("name"), savedInstanceState.getString("description"),
+                    savedInstanceState.getString("rating"), savedInstanceState.getString("image"), savedInstanceState.getString("release_date"));
+            Log.d("casdcc", selectedMovie.getName());
         }
 
         // Progress dialog
         pDialog = new ProgressDialog(getActivity());
         pDialog.setCancelable(false);
 
+        TrailersLoading = (ProgressBar) getView().findViewById(R.id.trailers_loading);
+        ReviewsLoading = (ProgressBar) getView().findViewById(R.id.reviews_loading);
+        trailersTxtView = (TextView) getView().findViewById(R.id.trailers_txtview);
+        reviewsTxtView = (TextView) getView().findViewById(R.id.reviews_txtview);
+
         ReviewsRecyclerView = (RecyclerView) getView().findViewById(R.id.reviewsRecyclerView);
         ReviewsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
         ReviewsRecyclerView.setItemAnimator(new DefaultItemAnimator());
         ReviewsRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
-
 
 /*
         reviewsAdapter = new ReviewsAdapter(getActivity(), reviewArrayList);
@@ -105,13 +147,6 @@ public class MovieDetails extends Fragment {
         trailersAdapter = new TrailersAdapter(getActivity(), trailerArrayList);
         TrailersRecyclerView.setAdapter(trailersAdapter);
 
-//        syncTrailers();
-
-
-
-  //      syncReviews();
-
-
 
         Title = (TextView) getView().findViewById(R.id.MovieTitle);
         ReleaseDate = (TextView) getView().findViewById(R.id.ReleaseDate);
@@ -119,16 +154,54 @@ public class MovieDetails extends Fragment {
         Description = (TextView) getView().findViewById(R.id.MovieDescription);
         Image = (ImageView) getView().findViewById(R.id.MovieImage);
 
+        favMovie = (ToggleButton) getView().findViewById(R.id.MovieFavBtn);
+
+
+        prefs = getActivity().getSharedPreferences("selectedMovie", Context.MODE_PRIVATE);
+
         if (selectedMovie != null) {
             updateMovieDetails(selectedMovie);
         }
+        else {
+
+            selectedMovie = new Movie(prefs.getString("id", ""), prefs.getString("name", ""), prefs.getString("description", ""),
+                    prefs.getString("rating", ""), prefs.getString("image", ""), prefs.getString("release_date", ""));
+            Log.d("ccc", selectedMovie.getName());
+            updateMovieDetails(selectedMovie);
+        }
+
+        favMovie.setOnCheckedChangeListener(this);
 
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        selectedMovie = outState.getParcelable("selectedMovie");
+        //outState.putParcelable("selectedMovie", selectedMovie);
+        outState.putString("id", selectedMovie.getId());
+        outState.putString("name", selectedMovie.getName());
+        outState.putString("description", selectedMovie.getDescription());
+        outState.putString("rating", selectedMovie.getRating());
+        outState.putString("release_date", selectedMovie.getReleaseDate());
+        outState.putString("image", selectedMovie.getImage());
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        prefs = getActivity().getSharedPreferences("selectedMovie", Context.MODE_PRIVATE);
+
+        editor = prefs.edit();
+        editor.putString("id", selectedMovie.getId());
+        editor.putString("name", selectedMovie.getName());
+        editor.putString("description", selectedMovie.getDescription());
+        editor.putString("rating", selectedMovie.getRating());
+        editor.putString("release_date", selectedMovie.getReleaseDate());
+        editor.putString("image", selectedMovie.getImage());
+
+        editor.commit();
+
     }
 
     @Override
@@ -141,6 +214,18 @@ public class MovieDetails extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+
+        prefs = getActivity().getSharedPreferences("selectedMovie", Context.MODE_PRIVATE);
+        selectedMovie = new Movie(prefs.getString("id", ""), prefs.getString("name", ""), prefs.getString("description", ""),
+                prefs.getString("rating", ""), prefs.getString("image", ""), prefs.getString("release_date", ""));
+        Log.d("ccc", selectedMovie.getName());
+
+        try{
+            sqLiteHandler.open();
+        }
+        catch (Exception e){
+
+        }
     }
 
     public void setMovie(Movie movie){
@@ -148,16 +233,24 @@ public class MovieDetails extends Fragment {
         selectedMovie = movie;
     }
 
+
     public void updateMovieDetails(Movie movie){
         selectedMovie = movie;
         Log.d("Movie Name3", movie.getName());
         Picasso.with(getActivity()).load(AppConst.MoviesDBImageURL + movie.getImage()).into(Image);
         Title.setText(movie.getName());
         Description.setText(movie.getDescription());
-        ReleaseDate.setText(movie.getReleaseDate().substring(0,4));
+        ReleaseDate.setText(movie.getReleaseDate());
         Rating.setText(movie.getRating() + "/10");
+
+        if(sqLiteHandler.getMoviesDetails(SQLiteHandler.ID + "=" + movie.getId()).size() != 0){
+            favMovie.setChecked(true);
+        }
+        else {
+            favMovie.setChecked(false);
+        }
         syncTrailers();
-//        syncReviews();
+        syncReviews();
     }
 
     private void syncTrailers(){
@@ -165,8 +258,10 @@ public class MovieDetails extends Fragment {
         // Tag used to cancel the request
         String tag_string_req = "req_trailers";
 
-        pDialog.setMessage("Loading Trailers ...");
-        showDialog();
+        //pDialog.setMessage("Loading Trailers ...");
+        //showDialog();
+
+        TrailersLoading.setVisibility(View.VISIBLE);
 
 
         StringRequest strReq = new StringRequest(Request.Method.GET, AppConst.MoviesDBURL + selectedMovie.getId() + "/videos?api_key=" + AppConst.APIKey,
@@ -175,9 +270,12 @@ public class MovieDetails extends Fragment {
 
                     @Override
                     public void onResponse(String response) {
-                        syncReviews();
+                        //syncReviews();
                         Log.d(TAG, "MoviesDB Response: " + response);
-                        hideDialog();
+                        //hideDialog();
+                        TrailersRecyclerView.setVisibility(View.VISIBLE);
+                        TrailersLoading.setVisibility(View.GONE);
+                        trailersTxtView.setVisibility(View.VISIBLE);
 
                         trailerArrayList = new ArrayList<Movie.Trailer>();
 
@@ -212,6 +310,10 @@ public class MovieDetails extends Fragment {
                                 //hideDialog();
 
                             }
+                            else {
+                                trailersTxtView.setVisibility(View.GONE);
+                                TrailersRecyclerView.setVisibility(View.GONE);
+                            }
                         } catch (JSONException e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();
@@ -223,8 +325,11 @@ public class MovieDetails extends Fragment {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.e(TAG, "Error: " + error.getMessage());
-                Toast.makeText(getActivity(), error.getMessage(), Toast.LENGTH_LONG).show();
-                hideDialog();
+                //Toast.makeText(getActivity(), error.getMessage(), Toast.LENGTH_LONG).show();
+                //hideDialog();
+                trailersTxtView.setVisibility(View.GONE);
+                TrailersLoading.setVisibility(View.GONE);
+                TrailersRecyclerView.setVisibility(View.GONE);
             }
         }) {
 /*
@@ -250,9 +355,9 @@ public class MovieDetails extends Fragment {
         // Tag used to cancel the request
         String tag_string_req = "req_reviews";
 
-        pDialog.setMessage("Loading Reviews ...");
-        showDialog();
-
+        //pDialog.setMessage("Loading Reviews ...");
+        //showDialog();
+        ReviewsLoading.setVisibility(View.VISIBLE);
 
         StringRequest strReq = new StringRequest(Request.Method.GET, AppConst.MoviesDBURL + selectedMovie.getId() + "/reviews?api_key=" + AppConst.APIKey,
                 new Response.Listener<String>() {
@@ -261,7 +366,10 @@ public class MovieDetails extends Fragment {
                     @Override
                     public void onResponse(String response) {
                         Log.d(TAG, "MoviesDB Response: " + response);
-                        hideDialog();
+                        //hideDialog();
+                        ReviewsRecyclerView.setVisibility(View.VISIBLE);
+                        ReviewsLoading.setVisibility(View.GONE);
+                        reviewsTxtView.setVisibility(View.VISIBLE);
 
                         reviewArrayList = new ArrayList<Movie.Review>();
 
@@ -295,6 +403,10 @@ public class MovieDetails extends Fragment {
                                 //hideDialog();
 
                             }
+                            else {
+                                reviewsTxtView.setVisibility(View.GONE);
+                                ReviewsRecyclerView.setVisibility(View.GONE);
+                            }
                         } catch (JSONException e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();
@@ -306,8 +418,11 @@ public class MovieDetails extends Fragment {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.e(TAG, "Error: " + error.getMessage());
-                Toast.makeText(getActivity(), error.getMessage(), Toast.LENGTH_LONG).show();
-                hideDialog();
+                //Toast.makeText(getActivity(), error.getMessage(), Toast.LENGTH_LONG).show();
+                //hideDialog();
+
+                reviewsTxtView.setVisibility(View.GONE);
+                ReviewsLoading.setVisibility(View.GONE);
             }
         });
 
@@ -332,14 +447,13 @@ public class MovieDetails extends Fragment {
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
 
-    private void showDialog() {
-        if (!pDialog.isShowing())
-            pDialog.show();
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if(isChecked){
+            sqLiteHandler.addMovie(selectedMovie);
+        }
+        else {
+            sqLiteHandler.deleteMovie(selectedMovie);
+        }
     }
-
-    private void hideDialog() {
-        if (pDialog.isShowing())
-            pDialog.dismiss();
-    }
-
 }

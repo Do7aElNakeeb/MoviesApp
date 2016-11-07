@@ -1,6 +1,8 @@
 package cf.do7aelnakeeb.moviesapp.activity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.drawable.GradientDrawable;
 import android.os.PersistableBundle;
@@ -48,6 +50,8 @@ public class MainActivity extends AppCompatActivity implements MoviesGrid.OnMovi
     MovieDetails movieDetails;
 
     Movie movie;
+    SharedPreferences prefs;
+    SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,11 +68,19 @@ public class MainActivity extends AppCompatActivity implements MoviesGrid.OnMovi
             fragmentTransaction.commit();
         }
 
+        else {
+
+            movie = new Movie(savedInstanceState.getString("id"), savedInstanceState.getString("name"), savedInstanceState.getString("description"),
+                    savedInstanceState.getString("rating"), savedInstanceState.getString("image"), savedInstanceState.getString("release_date"));
+            Log.d("casdcc", movie.getName());
+        }
+
+
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             movieDetailsFrag = true;
 //            movie = movieDetails.selectedMovie;
 //            Log.d("aaaaa", movie.getName());
-            Toast.makeText(this, "Landscape Orient", Toast.LENGTH_SHORT).show();
+
             if (movieDetails != null) {
                 Log.d("bbbb", "nullo");
                 getSupportFragmentManager().beginTransaction().remove(movieDetails).commit();
@@ -92,7 +104,8 @@ public class MainActivity extends AppCompatActivity implements MoviesGrid.OnMovi
 
         if(findViewById(R.id.movieDetailsFragment) != null){
             movieDetailsFrag = true;
-            getFragmentManager().popBackStack();
+            //getFragmentManager().popBackStack();
+            getSupportFragmentManager().popBackStackImmediate();
 
             movieDetails = (MovieDetails) getSupportFragmentManager().findFragmentById(R.id.movieDetailsFragment);
             if(movieDetails == null){
@@ -114,10 +127,29 @@ public class MainActivity extends AppCompatActivity implements MoviesGrid.OnMovi
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelable("selectedMovie", movie);
+        if (outState != null) {
+            outState.putString("id", movie.getId());
+            outState.putString("name", movie.getName());
+            outState.putString("description", movie.getDescription());
+            outState.putString("rating", movie.getRating());
+            outState.putString("release_date", movie.getReleaseDate());
+            outState.putString("image", movie.getImage());
+        }
     }
 
     @Override
     public void onMovieSelected(Movie movie) {
+        prefs = getSharedPreferences("selectedMovie", MODE_PRIVATE);
+        editor = prefs.edit();
+        editor.putString("id", movie.getId());
+        editor.putString("name", movie.getName());
+        editor.putString("description", movie.getDescription());
+        editor.putString("rating", movie.getRating());
+        editor.putString("release_date", movie.getReleaseDate());
+        editor.putString("image", movie.getImage());
+
+        editor.commit();
+
         this.movie = movie;
         if(movieDetailsFrag){
             Log.d("Movie Name", movie.getName());
@@ -135,4 +167,34 @@ public class MainActivity extends AppCompatActivity implements MoviesGrid.OnMovi
             ft.commit();
         }
     }
+/*
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        prefs = getSharedPreferences("selectedMovie", Context.MODE_PRIVATE);
+
+        editor = prefs.edit();
+        editor.putString("id", movie.getId());
+        editor.putString("name", movie.getName());
+        editor.putString("description", movie.getDescription());
+        editor.putString("rating", movie.getRating());
+        editor.putString("release_date", movie.getReleaseDate());
+        editor.putString("image", movie.getImage());
+
+        editor.commit();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        prefs = getSharedPreferences("selectedMovie", Context.MODE_PRIVATE);
+        if (movie == null) {
+            movie = new Movie(prefs.getString("id", ""), prefs.getString("name", ""), prefs.getString("description", ""),
+                    prefs.getString("rating", ""), prefs.getString("image", ""), prefs.getString("release_date", ""));
+            Log.d("ccc", movie.getName());
+        }
+    }
+    */
 }

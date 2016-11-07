@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -31,6 +32,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import cf.do7aelnakeeb.moviesapp.R;
@@ -38,6 +40,7 @@ import cf.do7aelnakeeb.moviesapp.app.AppConst;
 import cf.do7aelnakeeb.moviesapp.app.AppController;
 import cf.do7aelnakeeb.moviesapp.app.Movie;
 import cf.do7aelnakeeb.moviesapp.helper.MoviesAdapter;
+import cf.do7aelnakeeb.moviesapp.helper.SQLiteHandler;
 
 /**
  * Created by NakeebMac on 10/21/16.
@@ -55,6 +58,8 @@ public class MoviesGrid extends Fragment {
     ArrayList<Movie> movieArrayList;
 
     int MoviesCategories = 0;
+
+    SQLiteHandler sqLiteHandler;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -107,12 +112,14 @@ public class MoviesGrid extends Fragment {
         }
     }
 
+    /*
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
         outState.putParcelable("selectedMovie", movieArrayList.get(0));
     }
+    */
 
     private void syncMovies(){
 
@@ -154,7 +161,7 @@ public class MoviesGrid extends Fragment {
                                     String description = obj.get("overview").toString();
                                     String rating = obj.get("vote_average").toString();
                                     String image = obj.get("poster_path").toString();
-                                    String release_date = obj.get("release_date").toString();
+                                    String release_date = obj.get("release_date").toString().substring(0, 4);
 
                                     movieArrayList.add(new Movie(id, name, description, rating, image, release_date));
 
@@ -211,6 +218,43 @@ public class MoviesGrid extends Fragment {
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
 
+    private void syncFavorite(){
+
+        sqLiteHandler = new SQLiteHandler(getContext());
+
+        pDialog.setMessage("Loading Movies ...");
+        showDialog();
+
+        try {
+            sqLiteHandler.open();
+        }
+        catch (Exception e){
+            Toast.makeText(getActivity(), "Loading Failed", Toast.LENGTH_SHORT).show();
+        }
+
+
+        List<Movie> favMovies = sqLiteHandler.getMoviesDetails(null);
+
+        if (favMovies.size() != 0) {
+            movieArrayList = new ArrayList<Movie>();
+
+            for (int i = 0; i < favMovies.size(); i++){
+                movieArrayList.add(favMovies.get(i));
+                Log.d("FavMovie Added", favMovies.get(i).getImage());
+            }
+            moviesAdapter = new MoviesAdapter(getActivity(), movieArrayList, onMovieSelected);
+            MoviesRecyclerView.setAdapter(moviesAdapter);
+            hideDialog();
+
+        }
+        else {
+            Toast.makeText(getActivity(), "No Favorite Movies Found", Toast.LENGTH_SHORT).show();
+            hideDialog();
+        }
+
+
+    }
+
     private void showDialog() {
         if (!pDialog.isShowing())
             pDialog.show();
@@ -244,7 +288,7 @@ public class MoviesGrid extends Fragment {
                 return true;
             }
             case R.id.action_favorite: {
-
+                syncFavorite();
                 return true;
             }
             case R.id.refresh: {

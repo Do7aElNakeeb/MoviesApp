@@ -56,12 +56,13 @@
                         android:id="@+id/MovieRating"
                         android:text="Movie Rating"/>
 
-                    <Button
+                    <ToggleButton
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/MovieFavBtn"
-                        android:textSize="10dp"
-                        android:text="Favorite"/>
+                        android:textOff="Favorite"
+                        android:textOn="unFavorite"
+                        android:textSize="10dp"/>
                 </LinearLayout>
             </LinearLayout>
 
@@ -76,8 +77,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="Trailers"
+                android:id="@+id/trailers_txtview"
                 android:layout_marginLeft="20dp"
                 android:layout_marginBottom="10dp"/>
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_gravity="center"
+                android:id="@+id/trailers_loading"/>
 
             <android.support.v7.widget.RecyclerView
                 android:layout_width="match_parent"
@@ -93,8 +102,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="Reviews"
+                android:id="@+id/reviews_txtview"
                 android:layout_marginLeft="20dp"
-                android:layout_marginBottom="10dp"/>
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="5dp"/>
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_gravity="center"
+                android:id="@+id/reviews_loading"/>
 
             <android.support.v7.widget.RecyclerView
                 android:layout_width="match_parent"

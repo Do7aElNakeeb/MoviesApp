@@ -6,6 +6,7 @@ package cf.do7aelnakeeb.moviesapp.helper;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -28,7 +29,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "movies.db";
 
     // Login table name
-    public static final String TABLE_NAME = "stations";
+    public static final String TABLE_NAME = "favMovies";
 
     // Login Table Columns names
     public static final String ID = "movie_id";
@@ -39,38 +40,32 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     public static final String RELEASE_DATE = "release_date";
     public static final String TRAILERS = "trailers";
     public static final String REVIEWS = "reviews";
-    public static final String MOG95 = "MOG95";
-    public static final String Diesel = "diesel";
-    public static final String MOBILMART = "MobilMart";
-    public static final String ONTHERUN = "OnTheRun";
-    public static final String THEWAYTOGO = "TheWayToGo";
-    public static final String CARWASH = "CarWash";
-    public static final String Lubricants = "lubricants";
-    public static final String PHONE = "phone";
 
     private SQLiteDatabase db;
 
-    private String[] cols = {ID, NAME, DESCRIPTION, RATING,
-            RATING, IMAGE, RELEASE_DATE, TRAILERS, REVIEWS, SQLiteHandler.Diesel, SQLiteHandler.MOBILMART, SQLiteHandler.ONTHERUN,
-            SQLiteHandler.THEWAYTOGO, SQLiteHandler.CARWASH, SQLiteHandler.Lubricants, SQLiteHandler.PHONE};
+    private String[] cols = {ID, NAME, DESCRIPTION,
+            RATING, IMAGE, RELEASE_DATE/*, TRAILERS, REVIEWS*/};
 
 
     public SQLiteHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
+    public void open() throws SQLException {
+        db = getWritableDatabase();
+    }
+
+    public void close(){
+        db.close();
+    }
+
     // Creating Tables
     @Override
     public void onCreate(SQLiteDatabase db) {
         String CREATE_STATIONS_TABLE = "CREATE TABLE " + TABLE_NAME + "( id integer primary key autoincrement, "
-                + ID + " TEXT," + NAME + " TEXT,"
+                + ID + " integer not null," + NAME + " TEXT,"
                 + DESCRIPTION + " TEXT," + RATING + " TEXT,"
-                + IMAGE + " TEXT," + RELEASE_DATE + " TEXT,"
-                + TRAILERS + " TEXT," + REVIEWS + " TEXT,"
-                + MOG95 + " TEXT," + Diesel + " TEXT,"
-                + MOBILMART + " TEXT," + ONTHERUN + " TEXT,"
-                + THEWAYTOGO + " TEXT," + CARWASH + " TEXT,"
-                + Lubricants + " TEXT," + PHONE + " TEXT" + ")";
+                + IMAGE + " TEXT," + RELEASE_DATE + " TEXT, unique(" + ID + "))";
         db.execSQL(CREATE_STATIONS_TABLE);
 
         Log.d(TAG, "Database tables created");
@@ -89,32 +84,26 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     /**
      * Storing user details in database
      * */
-    public void addMovie(HashMap<String, String> queryValues) {
+    public void addMovie(Movie movie) {
 
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(ID, queryValues.get(ID));
-        values.put(NAME, queryValues.get(NAME));
-        values.put(DESCRIPTION, queryValues.get(DESCRIPTION));
-        values.put(RATING, queryValues.get(RATING));
-        values.put(IMAGE, queryValues.get(IMAGE));
-        values.put(RELEASE_DATE, queryValues.get(RELEASE_DATE));
+        values.put(ID, movie.getId());
+        values.put(NAME, movie.getName());
+        values.put(DESCRIPTION, movie.getDescription());
+        values.put(RATING, movie.getRating());
+        values.put(IMAGE, movie.getImage());
+        values.put(RELEASE_DATE, movie.getReleaseDate());
+        /*
         values.put(TRAILERS, queryValues.get(TRAILERS));
         values.put(REVIEWS, queryValues.get(REVIEWS));
-        values.put(MOG95, queryValues.get(MOG95));
-        values.put(Diesel, queryValues.get(Diesel));
-        values.put(MOBILMART, queryValues.get(MOBILMART));
-        values.put(ONTHERUN, queryValues.get(ONTHERUN));
-        values.put(THEWAYTOGO, queryValues.get(THEWAYTOGO));
-        values.put(CARWASH, queryValues.get(CARWASH));
-        values.put(Lubricants, queryValues.get(Lubricants));
-        values.put(PHONE, queryValues.get(PHONE));
+        */
 
         // Inserting Row
         long id = db.insert(TABLE_NAME, null, values);
-        db.close(); // Closing database connection
+        //close(); // Closing database connection
 
-        Log.d(TAG, "New station inserted into sqlite: " + id);
+        Log.d(TAG, "New movie inserted into sqlite: " + id);
     }
 
     /**
@@ -122,31 +111,36 @@ public class SQLiteHandler extends SQLiteOpenHelper {
      * */
 
     public List<Movie> getMoviesDetails(String args){
-        List<Movie> markers = new ArrayList<Movie>();
+        List<Movie> movies = new ArrayList<Movie>();
 
+        db = getReadableDatabase();
         Cursor cursor = db.query(TABLE_NAME, cols, args, null, null, null, null);
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            Movie movie = new Movie(cursor.getString(0), cursor.getString(1), cursor.getString(2),
-                    cursor.getString(3), cursor.getString(4), cursor.getString(5));
-            markers.add(movie);
+            Movie movie = new Movie(cursor.getString(0), cursor.getString(1), cursor.getString(2), cursor.getString(3),
+                    cursor.getString(4), cursor.getString(5));
+            movies.add(movie);
             cursor.moveToNext();
         }
         cursor.close();
 
-        return markers;
+        return movies;
     }
 
     /**
      * Re crate database Delete all tables and create them again
      * */
-    public void deleteMarkers(){
+    public void deleteMovies(){
         db.delete(SQLiteHandler.TABLE_NAME, null, null);
     }
 
+    public void deleteMovie(Movie movie){
+        db.delete(TABLE_NAME, ID  + "=" + movie.getId(), null);
+        Log.d("delete movie", movie.getName());
+    }
 
-    private Movie cursorToMarker(Cursor cursor) {
+    private Movie cursorToMovie(Cursor cursor) {
         return new Movie(cursor.getString(0), cursor.getString(1), cursor.getString(2),
                 cursor.getString(3), cursor.getString(4), cursor.getString(5));
 
