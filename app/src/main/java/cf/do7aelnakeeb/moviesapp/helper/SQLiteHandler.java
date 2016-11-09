@@ -12,7 +12,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import cf.do7aelnakeeb.moviesapp.app.Movie;
@@ -28,10 +27,10 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     // Database Name
     private static final String DATABASE_NAME = "movies.db";
 
-    // Login table name
+    // Favorite movies table name
     public static final String TABLE_NAME = "favMovies";
 
-    // Login Table Columns names
+    // Favorite movies Table Columns names
     public static final String ID = "movie_id";
     public static final String NAME = "name";
     public static final String DESCRIPTION = "description";
@@ -107,7 +106,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     }
 
     /**
-     * Getting user data from database
+     * Getting movie data from database
      * */
 
     public List<Movie> getMoviesDetails(String args){
@@ -129,7 +128,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     }
 
     /**
-     * Re crate database Delete all tables and create them again
+     * Re-create database Delete all tables and create them again
      * */
     public void deleteMovies(){
         db.delete(SQLiteHandler.TABLE_NAME, null, null);

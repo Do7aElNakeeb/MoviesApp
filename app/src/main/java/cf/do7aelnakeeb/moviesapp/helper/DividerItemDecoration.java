@@ -13,6 +13,12 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
+
+/**
+ *  Java lang programming blog article about RecyclerView Divider
+ *  http://java-lang-programming.com/en/articles/19
+ * */
+
 public class DividerItemDecoration extends RecyclerView.ItemDecoration {
 
     private static final int[] ATTRS = new int[]{

@@ -1,11 +1,8 @@
 package cf.do7aelnakeeb.moviesapp.activity;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -20,7 +17,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -71,6 +67,10 @@ public class MoviesGrid extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        if (savedInstanceState != null) {
+            MoviesCategories = savedInstanceState.getInt("MoviesCategory");
+        }
+
         // Progress dialog
         pDialog = new ProgressDialog(getActivity());
         pDialog.setCancelable(false);
@@ -81,10 +81,11 @@ public class MoviesGrid extends Fragment {
 
         MoviesRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        syncMovies();
+        syncMovies(MoviesCategories);
 
         moviesAdapter = new MoviesAdapter(getActivity(), movieArrayList, onMovieSelected);
         MoviesRecyclerView.setAdapter(moviesAdapter);
+
 
     }
 
@@ -112,15 +113,6 @@ public class MoviesGrid extends Fragment {
         }
     }
 
-    /*
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putParcelable("selectedMovie", movieArrayList.get(0));
-    }
-    */
-
     private void syncMovies(){
 
         // Tag used to cancel the request
@@ -143,9 +135,9 @@ public class MoviesGrid extends Fragment {
 
                         try {
                             // Extract JSON array from the response
-                            JSONObject arr = new JSONObject(response);
-                            JSONArray resultsArr = arr.getJSONArray("results");
-                            System.out.println(arr.length());
+                            JSONObject jsonObject = new JSONObject(response);
+                            JSONArray resultsArr = jsonObject.getJSONArray("results");
+                            System.out.println(jsonObject.length());
                             // If no of array elements is not zero
                             if(resultsArr.length() != 0){
 
@@ -169,8 +161,6 @@ public class MoviesGrid extends Fragment {
 
                                 moviesAdapter = new MoviesAdapter(getActivity(), movieArrayList, onMovieSelected);
                                 MoviesRecyclerView.setAdapter(moviesAdapter);
-
-                                //hideDialog();
 
                             }
                         } catch (JSONException e) {
@@ -218,6 +208,12 @@ public class MoviesGrid extends Fragment {
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("MoviesCategory", MoviesCategories);
+    }
+
     private void syncFavorite(){
 
         sqLiteHandler = new SQLiteHandler(getContext());
@@ -252,7 +248,26 @@ public class MoviesGrid extends Fragment {
             hideDialog();
         }
 
+    }
 
+    private void syncMovies(int Category){
+        switch (Category){
+            case 0:
+                syncMovies();
+                break;
+
+            case 1:
+                syncMovies();
+                break;
+
+            case 2:
+                syncFavorite();
+                break;
+
+            default:
+                syncMovies();
+                break;
+        }
     }
 
     private void showDialog() {
@@ -278,21 +293,22 @@ public class MoviesGrid extends Fragment {
         switch (item.getItemId()) {
             case R.id.action_popular: {
                 MoviesCategories = 0;
-                syncMovies();
+                syncMovies(0);
                 return true;
             }
 
             case R.id.action_top_rated: {
                 MoviesCategories = 1;
-                syncMovies();
+                syncMovies(1);
                 return true;
             }
             case R.id.action_favorite: {
-                syncFavorite();
+                MoviesCategories = 2;
+                syncMovies(2);
                 return true;
             }
             case R.id.refresh: {
-                syncMovies();
+                syncMovies(MoviesCategories);
                 return true;
             }
             default:

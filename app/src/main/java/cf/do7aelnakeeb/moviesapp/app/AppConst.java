@@ -45,22 +45,4 @@ public class AppConst {
     public static String[] MoviesDBCategories = {"popular", "top_rated"};
 
 
-    public static ArrayList<String> movieData = new ArrayList<String>(){{
-        add("id"); add("original_title"); add("overview"); add("original_title"); add("vote_average");
-        add("poster_path"); add("release_date");
-    }};
-
-    public static ArrayList<String> movieReviewsData = new ArrayList<String>(){{
-        add("id"); add("author"); add("content"); add("url");
-    }};
-
-    public static ArrayList<String> movieTrailersData = new ArrayList<String>(){{
-        add("id"); add("key"); add("name"); add("type"); add("site");
-    }};
-
-    Map<String, String> APImovieParams = new HashMap<String, String>(){{
-        put("api_key", APIKey);
-        put("language", MoviesDBAPILanguage);
-    }};
-
 }

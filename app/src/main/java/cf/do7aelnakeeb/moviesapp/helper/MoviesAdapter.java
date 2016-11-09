@@ -1,13 +1,8 @@
 package cf.do7aelnakeeb.moviesapp.helper;
 
 import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +13,6 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 
 import cf.do7aelnakeeb.moviesapp.R;
-import cf.do7aelnakeeb.moviesapp.activity.MovieDetails;
 import cf.do7aelnakeeb.moviesapp.app.AppConst;
 import cf.do7aelnakeeb.moviesapp.app.Movie;
 import cf.do7aelnakeeb.moviesapp.activity.MoviesGrid;

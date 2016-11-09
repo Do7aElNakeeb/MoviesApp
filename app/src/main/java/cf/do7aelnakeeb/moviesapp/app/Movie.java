@@ -1,16 +1,12 @@
 package cf.do7aelnakeeb.moviesapp.app;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
-import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Created by NakeebMac on 10/21/16.
  */
 
-public class Movie implements Parcelable{
+public class Movie {
 
     private String id;
     private String name;
@@ -20,6 +16,7 @@ public class Movie implements Parcelable{
     private String releaseDate;
     public ArrayList<Review> reviewsArrayList;
     public ArrayList<Trailer> trailersArrayList;
+
 
     public static class Review {
         private String id;
@@ -66,7 +63,6 @@ public class Movie implements Parcelable{
         }
 
 
-
         public String getKey() {
             return key;
         }
@@ -95,28 +91,8 @@ public class Movie implements Parcelable{
         this.releaseDate = releaseDate;
     }
 
+
     // Setters and Getters
-
-    protected Movie(Parcel in) {
-        id = in.readString();
-        name = in.readString();
-        description = in.readString();
-        rating = in.readString();
-        image = in.readString();
-        releaseDate = in.readString();
-    }
-
-    public static final Creator<Movie> CREATOR = new Creator<Movie>() {
-        @Override
-        public Movie createFromParcel(Parcel in) {
-            return new Movie(in);
-        }
-
-        @Override
-        public Movie[] newArray(int size) {
-            return new Movie[size];
-        }
-    };
 
     public String getId(){
         return this.id;
@@ -166,19 +142,5 @@ public class Movie implements Parcelable{
         this.releaseDate = releaseDate;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-
-        dest.writeString(id);
-        dest.writeString(name);
-        dest.writeString(description);
-        dest.writeString(rating);
-        dest.writeString(image);
-        dest.writeString(releaseDate);
-    }
 }

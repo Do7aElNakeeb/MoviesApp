@@ -45,7 +45,7 @@ public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.ViewHo
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
 
-        Picasso.with(context).load(AppConst.TrailerThumbnail + arrayList.get(position).getKey() + "/0.jpg").into(holder.trailerThumbnail);
+        Picasso.with(context).load(AppConst.TrailerThumbnail + arrayList.get(position).getKey() + "/mqdefault.jpg").into(holder.trailerThumbnail);
 
         holder.trailerPlay.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -61,11 +61,11 @@ public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.ViewHo
         return (null != arrayList ? arrayList.size() : 0);
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
 
         ImageView trailerThumbnail;
         ImageView trailerPlay;
-        public ViewHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
 
             trailerThumbnail = (ImageView) itemView.findViewById(R.id.trailerThumbnail);
