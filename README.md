@@ -29,4 +29,4 @@ Screenshots
 -------------
 
 <img src="Screenshots/MoviesApp1.png" height="400" alt="Screenshot"/> <img src="Screenshots/MoviesApp2.png" height="400" alt="Screenshot"/> <img src="Screenshots/MoviesApp3.png" height="400" alt="Screenshot"/> 
-<img src="Screenshots/MoviesApp4.png" height="500" alt="Screenshot"/> <img src="Screenshots/MoviesApp5.png" height="200" alt="Screenshot"/> 
+<img src="Screenshots/MoviesApp4.png" height="200" alt="Screenshot"/> <img src="Screenshots/MoviesApp5.png" height="200" alt="Screenshot"/> 
