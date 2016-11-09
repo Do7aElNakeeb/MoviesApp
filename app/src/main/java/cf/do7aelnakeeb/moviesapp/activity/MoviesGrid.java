@@ -3,6 +3,7 @@ package cf.do7aelnakeeb.moviesapp.activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -37,6 +38,7 @@ import cf.do7aelnakeeb.moviesapp.app.AppConst;
 import cf.do7aelnakeeb.moviesapp.app.AppController;
 import cf.do7aelnakeeb.moviesapp.app.Movie;
 import cf.do7aelnakeeb.moviesapp.helper.MoviesAdapter;
+import cf.do7aelnakeeb.moviesapp.helper.MoviesProvider;
 import cf.do7aelnakeeb.moviesapp.helper.SQLiteHandler;
 
 /**
@@ -56,7 +58,8 @@ public class MoviesGrid extends Fragment {
 
     int MoviesCategories = 0;
 
-    SQLiteHandler sqLiteHandler;
+    // Deal with SQLite directly
+    //SQLiteHandler sqLiteHandler;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -126,7 +129,6 @@ public class MoviesGrid extends Fragment {
         StringRequest strReq = new StringRequest(Request.Method.POST, AppConst.MoviesDBURL + AppConst.MoviesDBCategories[MoviesCategories],
                 new Response.Listener<String>() {
 
-
                     @Override
                     public void onResponse(String response) {
                         Log.d(TAG, "MoviesDB Response: " + response);
@@ -189,21 +191,7 @@ public class MoviesGrid extends Fragment {
                 return params;
             }
 
-
-            /**
-             * Passing some request headers
-             * */
-            /*
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                HashMap<String, String> headers = new HashMap<String, String>();
-                //   headers.put("Content-Type", "application/json");
-                headers.put("api_key", AppConst.APIKey);
-                return headers;
-            }
-            */
         };
-
 
         // Adding request to request queue
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
@@ -217,28 +205,41 @@ public class MoviesGrid extends Fragment {
 
     private void syncFavorite(){
 
-        sqLiteHandler = new SQLiteHandler(getContext());
+
 
         pDialog.setMessage("Loading Movies ...");
         showDialog();
 
+
+        /*
+        sqLiteHandler = new SQLiteHandler(getContext());
         try {
             sqLiteHandler.open();
         }
         catch (Exception e){
             Toast.makeText(getActivity(), "Loading Failed", Toast.LENGTH_SHORT).show();
         }
+        /*
 
+         */
+        movieArrayList = new ArrayList<Movie>();
 
-        List<Movie> favMovies = sqLiteHandler.getMoviesDetails(null);
+        // Getting data using content provider
+        Cursor cursor = getContext().getContentResolver().query(MoviesProvider.CONTENT_URI, SQLiteHandler.cols, null, null, null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            Movie movie = new Movie(cursor.getString(0), cursor.getString(1), cursor.getString(2), cursor.getString(3),
+                    cursor.getString(4), cursor.getString(5));
+            movieArrayList.add(movie);
+            Log.d("FavMovie Added", movieArrayList.get(cursor.getPosition()).getImage());
+            cursor.moveToNext();
+        }
+        cursor.close();
 
-        if (favMovies.size() != 0) {
-            movieArrayList = new ArrayList<Movie>();
+        // Getting data directly from SQlite
+        //List<Movie> favMovies = sqLiteHandler.getMoviesDetails(null);
 
-            for (int i = 0; i < favMovies.size(); i++){
-                movieArrayList.add(favMovies.get(i));
-                Log.d("FavMovie Added", favMovies.get(i).getImage());
-            }
+        if (movieArrayList.size() != 0) {
             moviesAdapter = new MoviesAdapter(getActivity(), movieArrayList, onMovieSelected);
             MoviesRecyclerView.setAdapter(moviesAdapter);
             hideDialog();

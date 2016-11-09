@@ -15,7 +15,7 @@ import android.view.View;
 
 
 /**
- *  Java lang programming blog article about RecyclerView Divider
+ *  Java lang programming blog article about RecyclerView DividerItemDecoration
  *  http://java-lang-programming.com/en/articles/19
  * */
 

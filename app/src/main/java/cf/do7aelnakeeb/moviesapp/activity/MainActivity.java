@@ -11,6 +11,11 @@ import android.util.Log;
 import cf.do7aelnakeeb.moviesapp.R;
 import cf.do7aelnakeeb.moviesapp.app.Movie;
 
+/**
+ * Lecture about dynamic layouts using fragment manager
+ * http://www.cs.dartmouth.edu/~campbell/cs65/lecture09/lecture09.html
+ * */
+
 public class MainActivity extends AppCompatActivity implements MoviesGrid.OnMovieSelected{
 
     Boolean movieDetailsFrag = false;

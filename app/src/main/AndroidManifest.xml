@@ -18,6 +18,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <provider
+            android:authorities="cf.do7aelnakeeb.moviesapp.helper.MoviesProvider"
+            android:name=".helper.MoviesProvider" >
+        </provider>
     </application>
 
 </manifest>

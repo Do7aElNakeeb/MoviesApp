@@ -31,6 +31,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     public static final String TABLE_NAME = "favMovies";
 
     // Favorite movies Table Columns names
+    public static final String COLUMN_ID = "id";
     public static final String ID = "movie_id";
     public static final String NAME = "name";
     public static final String DESCRIPTION = "description";
@@ -42,7 +43,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
 
     private SQLiteDatabase db;
 
-    private String[] cols = {ID, NAME, DESCRIPTION,
+    public static final String[] cols = {ID, NAME, DESCRIPTION,
             RATING, IMAGE, RELEASE_DATE/*, TRAILERS, REVIEWS*/};
 
 
@@ -50,18 +51,12 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
-    public void open() throws SQLException {
-        db = getWritableDatabase();
-    }
 
-    public void close(){
-        db.close();
-    }
 
     // Creating Tables
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String CREATE_STATIONS_TABLE = "CREATE TABLE " + TABLE_NAME + "( id integer primary key autoincrement, "
+        String CREATE_STATIONS_TABLE = "CREATE TABLE " + TABLE_NAME + "( " + COLUMN_ID + "id integer primary key autoincrement, "
                 + ID + " integer not null," + NAME + " TEXT,"
                 + DESCRIPTION + " TEXT," + RATING + " TEXT,"
                 + IMAGE + " TEXT," + RELEASE_DATE + " TEXT, unique(" + ID + "))";
@@ -81,7 +76,19 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     }
 
     /**
-     * Storing user details in database
+     * All these methods used to deal directly with SQLite
+     * */
+
+    public void open() throws SQLException {
+        db = getWritableDatabase();
+    }
+
+    public void close(){
+        db.close();
+    }
+
+    /**
+     * Storing movie details in database
      * */
     public void addMovie(Movie movie) {
 

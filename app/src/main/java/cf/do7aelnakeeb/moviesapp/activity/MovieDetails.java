@@ -1,12 +1,13 @@
 package cf.do7aelnakeeb.moviesapp.activity;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v4.view.ViewPager;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -42,6 +43,7 @@ import cf.do7aelnakeeb.moviesapp.app.AppConst;
 import cf.do7aelnakeeb.moviesapp.app.AppController;
 import cf.do7aelnakeeb.moviesapp.app.Movie;
 import cf.do7aelnakeeb.moviesapp.helper.DividerItemDecoration;
+import cf.do7aelnakeeb.moviesapp.helper.MoviesProvider;
 import cf.do7aelnakeeb.moviesapp.helper.ReviewsAdapter;
 import cf.do7aelnakeeb.moviesapp.helper.SQLiteHandler;
 import cf.do7aelnakeeb.moviesapp.helper.TrailersAdapter;
@@ -80,7 +82,8 @@ public class MovieDetails extends Fragment implements CompoundButton.OnCheckedCh
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
 
-    SQLiteHandler sqLiteHandler;
+    // Deal with SQLite directly
+    //SQLiteHandler sqLiteHandler;
 
     private ShareActionProvider mShareActionProvider;
 
@@ -90,7 +93,11 @@ public class MovieDetails extends Fragment implements CompoundButton.OnCheckedCh
 
         trailerArrayList = new ArrayList<Movie.Trailer>();
         setHasOptionsMenu(true);
+
+        // Deal with SQLite directly
+        /*
         sqLiteHandler = new SQLiteHandler(getContext());
+
 
         try {
             sqLiteHandler.open();
@@ -98,6 +105,7 @@ public class MovieDetails extends Fragment implements CompoundButton.OnCheckedCh
         catch (Exception e){
             Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
         }
+        */
     }
 
     @Override
@@ -186,12 +194,15 @@ public class MovieDetails extends Fragment implements CompoundButton.OnCheckedCh
     public void onResume() {
         super.onResume();
 
+        // Deal with SQLite directly
+        /*
         try{
             sqLiteHandler.open();
         }
         catch (Exception e){
             Log.e("SQLiteError", e.getMessage());
         }
+        */
     }
 
     public void setMovie(Movie movie){
@@ -210,12 +221,29 @@ public class MovieDetails extends Fragment implements CompoundButton.OnCheckedCh
         ReleaseDate.setText(movie.getReleaseDate());
         Rating.setText(movie.getRating() + "/10");
 
+
+        // Getting data using content provider
+        Cursor cursor = getContext().getContentResolver().query(MoviesProvider.CONTENT_URI, SQLiteHandler.cols, SQLiteHandler.ID + "=" + movie.getId(), null, null);
+        cursor.moveToFirst();
+        if (cursor.getCount() > 0) {
+            favMovie.setChecked(true);
+        }
+        else {
+            favMovie.setChecked(false);
+        }
+        cursor.close();
+
+
+        // Getting data direct from SQLite
+        /*
         if(sqLiteHandler.getMoviesDetails(SQLiteHandler.ID + "=" + movie.getId()).size() != 0){
             favMovie.setChecked(true);
         }
         else {
             favMovie.setChecked(false);
         }
+        */
+
         syncTrailers();
         syncReviews();
     }
@@ -293,19 +321,7 @@ public class MovieDetails extends Fragment implements CompoundButton.OnCheckedCh
                 TrailersLoading.setVisibility(View.GONE);
                 TrailersRecyclerView.setVisibility(View.GONE);
             }
-        }) {
-/*
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError{
-                // Posting params to register url
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("api_key", AppConst.APIKey );
-                params.put("language", AppConst.MoviesDBAPILanguage);
-                return params;
-            }
-            */
-
-        };
+        }) ;
 
         // Adding request to request queue
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
@@ -383,23 +399,6 @@ public class MovieDetails extends Fragment implements CompoundButton.OnCheckedCh
             }
         });
 
-        /*{
-
-            /*
-            @Override
-            protected Map<String, String> getParams() {
-                // Posting params to register url
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("api_key", AppConst.APIKey );
-                params.put("language", AppConst.MoviesDBAPILanguage);
-                return params;
-            }
-
-
-
-        };
-    */
-
         // Adding request to request queue
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
@@ -407,10 +406,26 @@ public class MovieDetails extends Fragment implements CompoundButton.OnCheckedCh
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if(isChecked){
-            sqLiteHandler.addMovie(selectedMovie);
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(SQLiteHandler.ID, selectedMovie.getId());
+            contentValues.put(SQLiteHandler.NAME, selectedMovie.getName());
+            contentValues.put(SQLiteHandler.DESCRIPTION, selectedMovie.getDescription());
+            contentValues.put(SQLiteHandler.RATING, selectedMovie.getRating());
+            contentValues.put(SQLiteHandler.IMAGE, selectedMovie.getImage());
+            contentValues.put(SQLiteHandler.RELEASE_DATE, selectedMovie.getReleaseDate());
+
+            // Insert data using content provider
+            getContext().getContentResolver().insert(MoviesProvider.CONTENT_URI, contentValues);
+
+            // Insert data direct to SQLite
+            //sqLiteHandler.addMovie(selectedMovie);
         }
         else {
-            sqLiteHandler.deleteMovie(selectedMovie);
+            // Delete data using content provider
+            getContext().getContentResolver().delete(MoviesProvider.CONTENT_URI, selectedMovie.getId(), null);
+
+            // Delete data direct from SQLite
+            //sqLiteHandler.deleteMovie(selectedMovie);
         }
     }
 
