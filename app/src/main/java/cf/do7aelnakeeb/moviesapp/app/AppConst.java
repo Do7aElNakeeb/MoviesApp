@@ -37,6 +37,10 @@ public class AppConst {
     // MoviesDB Images Url
     public static String MoviesDBImageURL = "https://image.tmdb.org/t/p/w185";
 
+    /**
+     * Youtube video thumbnail URL
+     * http://stackoverflow.com/questions/2068344/how-do-i-get-a-youtube-video-thumbnail-from-the-youtube-api
+     * */
     // MoviesDB Images Url
     public static String TrailerThumbnail = "http://img.youtube.com/vi/";
 

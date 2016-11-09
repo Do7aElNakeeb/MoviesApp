@@ -2,6 +2,7 @@ package cf.do7aelnakeeb.moviesapp.activity;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -251,6 +252,9 @@ public class MoviesGrid extends Fragment {
     }
 
     private void syncMovies(int Category){
+
+        getActivity().invalidateOptionsMenu();
+
         switch (Category){
             case 0:
                 syncMovies();
@@ -286,6 +290,14 @@ public class MoviesGrid extends Fragment {
         inflater.inflate(R.menu.menu_main, menu);
         super.onCreateOptionsMenu(menu, inflater);
 
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT && menu.findItem(R.id.menu_item_share) != null){
+            menu.findItem(R.id.menu_item_share).setVisible(false);
+        }
+        super.onPrepareOptionsMenu(menu);
     }
 
     @Override
