@@ -2,6 +2,9 @@
 MAL - Cohort E Graduation Project
 http://mobileapplaunchpad.com.eg
 
+Udacity Review:
+https://review.udacity.com/#!/reviews/270232/shared
+
 Developing Android Apps - Udacity course
 https://classroom.udacity.com/courses/ud853ar
 
